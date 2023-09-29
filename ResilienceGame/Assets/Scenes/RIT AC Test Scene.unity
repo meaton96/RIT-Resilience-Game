@@ -13288,7 +13288,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 183a85d4eb1a2224b98d1e6d513cab8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mDirectoryName: ACScenario
+  mDirectoryName: ACScenario/Images
   mOutputFileName: ../atlas.png
   mReader: {fileID: 1269387672}
 --- !u!1 &1271643113

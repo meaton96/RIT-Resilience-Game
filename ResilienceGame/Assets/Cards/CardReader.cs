@@ -491,22 +491,24 @@ public class CardReader : MonoBehaviour
                 // made when the atlas is made. If it is the matching image, then we take a sub-section of the atlas
                 // and add it to the card.
                 // ** VERY IMPORTANT ** The texture2D width and Height need to match what is in the TextureAtlas.cs file and all images for cards need to adhere to this size for this to work properly.
+                Debug.Log(TextureAtlas.textureUVs.Count);
                 for (int j = 0; j < TextureAtlas.textureUVs.Count; j++)
                 {
                     TextureUV texUV = TextureAtlas.textureUVs[j];
-                    if (texUV.location.Trim() == individualCSVObjects[3].Trim()) // Check to make sure that the TextureUV and the current CSV objects image are the same
+                    if (texUV.location.Trim() == "ACScenario/Images\\" + individualCSVObjects[3].Trim()) // Check to make sure that the TextureUV and the current CSV objects image are the same
                     {
-
-                        Texture2D tex3 = new Texture2D(128, 128); // This needs to match the textureatlas pixel width
+                        Debug.Log("SUCCESS " + individualCSVObjects[3].Trim());
+                        Texture2D tex3 = new Texture2D(512, 512); // This needs to match the textureatlas pixel width
 
 
                         //tempCardObj.GetComponentInChildren<RawImage>().texture = tex3;
                         //tempCard.img.texture = tex3;
                         tempCardFront.img = tex3;
 
-                        Color[] tempColors = tex.GetPixels(texUV.column * 1640, texUV.row * 2360, 1640, 2360); // This needs to match the textureatlas pixel width
+                        Color[] tempColors = tex.GetPixels(texUV.column * 512, texUV.row * 512, 512, 512); // This needs to match the textureatlas pixel width
                         tex3.SetPixels(tempColors);
                         tex3.Apply();
+
                         break;
                     }
                 }

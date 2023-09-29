@@ -15,6 +15,8 @@ public class CreateTextureAtlas : MonoBehaviour
 
         TextureAtlas.instance.CreateAtlasComponentData(mDirectoryName, mOutputFileName); // Not generating the atlas in build rn
 
+        Debug.Log(TextureAtlas.textureUVs[0].location);
+        Debug.Log(TextureAtlas.textureUVs);
         UnityEngine.Debug.Log("Done with creation of texture atlas.");
 
         mReader = GetComponent<CardReader>();
