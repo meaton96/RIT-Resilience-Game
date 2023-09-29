@@ -129,28 +129,49 @@ public class Card : MonoBehaviour, IDropHandler
                             // check the cards teamID to see which team they belong to so they can call the proper Select facility method to then see if they have met all conditions to play the card
                             if(this.teamID == 0)
                             {
-                                if (this.gameObject.GetComponentInParent<Player>().SelectFacility(this.cardID))
+                                if (this.gameObject.GetComponentInParent<Player>().PlayCardAC(this))
                                 {
                                     this.state = CardState.CardInPlay;
                                     this.gameObject.GetComponentInParent<slippy>().enabled = false;
-                                    // Set the time the card is to be disposed of by adding the duration of the card to the current turn count
+                                    this.gameObject.GetComponentInParent<Player>().handSize--;
                                 }
                                 else
                                 {
                                     this.gameObject.transform.SetParent(handDropZone.transform, true);
                                 }
+                                //if (this.gameObject.GetComponentInParent<Player>().SelectFacility(this.cardID))
+                                //{
+                                //    this.state = CardState.CardInPlay;
+                                //    this.gameObject.GetComponentInParent<slippy>().enabled = false;
+                                //    // Set the time the card is to be disposed of by adding the duration of the card to the current turn count
+                                //}
+                                //else
+                                //{
+                                //    this.gameObject.transform.SetParent(handDropZone.transform, true);
+                                //}
                             }
                             else if(this.teamID == 1)
                             {
-                                if (this.gameObject.GetComponentInParent<MaliciousActor>().SelectFacility(this.cardID))
+                                if (this.gameObject.GetComponentInParent<MaliciousActor>().PlayCardAC(this))
                                 {
                                     this.state = CardState.CardInPlay;
                                     this.gameObject.GetComponentInParent<slippy>().enabled = false;
+                                    this.gameObject.GetComponentInParent<MaliciousActor>().handSize--;
+
                                 }
                                 else
                                 {
                                     this.gameObject.transform.SetParent(handDropZone.transform, true);
                                 }
+                                //if (this.gameObject.GetComponentInParent<MaliciousActor>().SelectFacility(this.cardID))
+                                //{
+                                //this.state = CardState.CardInPlay;
+                                //this.gameObject.GetComponentInParent<slippy>().enabled = false;
+                                //}
+                                //else
+                                //{
+                                //    this.gameObject.transform.SetParent(handDropZone.transform, true);
+                                //}
                             } 
 
                         }

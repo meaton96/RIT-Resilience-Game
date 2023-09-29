@@ -10,7 +10,9 @@ public class CardFront : MonoBehaviour
     public byte[] title;
     public byte[] description;
     public byte[] impact;
+    public int cost;
     public GameObject innerTexts;
+    public GameObject costText;
     //public NativeArray<byte> description;
     public Texture2D img;
 

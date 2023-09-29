@@ -59,6 +59,9 @@ public class CardReader : MonoBehaviour
     // Reformat to an SOA style 
     public void CSVRead()
     {
+        Debug.Log("SAM LOOK HERE!");
+        Debug.Log(Application.dataPath);
+        Debug.Log(Application.absoluteURL);
         // Check to see if the file exists
         if (File.Exists(cardFileLoc))
         {
@@ -170,6 +173,7 @@ public class CardReader : MonoBehaviour
                 {
                     tempCard.cost = int.Parse(individualCSVObjects[2]);
                     CardCost[i] = int.Parse(individualCSVObjects[2]);
+                    tempCardFront.cost = int.Parse(individualCSVObjects[2]);
                 }
 
                 byte[] temp2 = Encoding.ASCII.GetBytes(individualCSVObjects[4]);
@@ -500,7 +504,7 @@ public class CardReader : MonoBehaviour
                         //tempCard.img.texture = tex3;
                         tempCardFront.img = tex3;
 
-                        Color[] tempColors = tex.GetPixels(texUV.column * 128, texUV.row * 128, 128, 128); // This needs to match the textureatlas pixel width
+                        Color[] tempColors = tex.GetPixels(texUV.column * 1640, texUV.row * 2360, 1640, 2360); // This needs to match the textureatlas pixel width
                         tex3.SetPixels(tempColors);
                         tex3.Apply();
                         break;

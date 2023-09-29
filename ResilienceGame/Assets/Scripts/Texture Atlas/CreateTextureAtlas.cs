@@ -8,7 +8,9 @@ public class CreateTextureAtlas : MonoBehaviour
     public CardReader mReader;
     public void Start()
     {
-
+        Debug.Log("SAM LOOK HERE!");
+        Debug.Log(Application.dataPath);
+        Debug.Log(Application.absoluteURL);
         UnityEngine.Debug.Log("Starting");
 
         TextureAtlas.instance.CreateAtlasComponentData(mDirectoryName, mOutputFileName); // Not generating the atlas in build rn

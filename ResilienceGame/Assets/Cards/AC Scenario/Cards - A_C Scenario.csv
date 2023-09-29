@@ -1,0 +1,6 @@
+Red,Overclock A/C Unit,5,,Hack into the A/C controls and overlock the A/C unit. This causes it to overheat and the crankshaft to break.,A/C is broken,100,0,4,0,1,Any,5,Initial Access,,
+Red,Post Spoofed Messages on Reddit,6,,"Go to the RIT subreddit and begin posting fake messages that ""RIT does not care about their students or well-beings""",Students begin complaining,100,0,4,0,1,Any,5,Initial Access,,
+Red,Fake Spare Part,7,,Create and post a fake part for the University to buy.,Delayed A/C Repair,100,0,4,0,1,Any,5,Initial Access,,
+Blue,File FMS Request,5,,File an FMS Request to have the crankshaft repaired,Elevate the incident,100,0,4,0,1,Any,5,,,
+Blue,Send Follow-up Emails,6,,Alert the head of the department of the AC being broken and no response from your request.,Discover who to contact,100,0,4,0,1,Any,5,,,
+Blue,Order New Crankshaft,7,,Place an order for a new crankshaft to be manufactured,Begin repair process,100,0,4,0,1,Any,5,,,

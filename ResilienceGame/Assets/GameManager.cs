@@ -221,7 +221,7 @@ public class GameManager : MonoBehaviour, IDragHandler
                 playerMenu.SetActive(true);
                 maliciousActorMenu.SetActive(false);
                 yarnSpinner.SetActive(true);
-                fundText.text = "Funds: " + allPlayers[activePlayerNumber].GetComponent<Player>().funds;
+                //fundText.text = "Action Points: " + allPlayers[0].GetComponent<Player>().funds;
                 // If enough of the facilites are down, trigger response from the govt
 
 
@@ -232,7 +232,7 @@ public class GameManager : MonoBehaviour, IDragHandler
                 playerMenu.SetActive(false);
                 maliciousActorMenu.SetActive(true);
                 yarnSpinner.SetActive(false);
-                fundText.text = "Funds: " + maliciousActor.funds;
+                //fundText.text = "Action Points: " + maliciousActor.funds;
 
             }
         }
@@ -329,15 +329,33 @@ public class GameManager : MonoBehaviour, IDragHandler
             turnCount += 0.5f;
             if (playerActive)
             {
-                activePlayerText.text = allPlayers[activePlayerNumber].GetComponent<Player>().type + " Player";
-                fundText.text = "Funds: " + allPlayers[activePlayerNumber].GetComponent<Player>().funds;
-
+                allPlayers[0].SetActive(true);
+                activePlayerText.text = "Resilient Player";
+                allPlayers[0].GetComponent<Player>().funds = (int) ( 5 + turnCount);
+                Debug.Log(allPlayers[0].GetComponent<Player>().funds);
+                fundText.text = "Action Points: " + allPlayers[0].GetComponent<Player>().funds;
+                if (allPlayers[0].GetComponent<Player>().handSize < 5)
+                {
+                    allPlayers[0].GetComponent<Player>().DrawCard();
+                }
                 activePlayerColor = new Color(0.0f, 0.4209991f, 1.0f, 1.0f);
                 activePlayerText.color = activePlayerColor;
                 yarnSpinner.SetActive(true);
                 facilityEvents.SpawnEvent();
-                ChangePlayers();
-                foreach (GameObject card in maliciousActor.GetComponent<MaliciousActor>().HandList)
+                //ChangePlayers();
+                foreach (GameObject card in allPlayers[0].GetComponent<Player>().HandList)
+                {
+                    card.SetActive(false);
+                }
+                foreach (GameObject card in allPlayers[0].GetComponent<Player>().ActiveCardList)
+                {
+                    card.SetActive(false);
+                }
+                foreach (GameObject card in allPlayers[0].GetComponent<Player>().HandList)
+                {
+                    card.SetActive(true);
+                }
+                foreach (GameObject card in allPlayers[0].GetComponent<Player>().ActiveCardList)
                 {
                     card.SetActive(false);
                 }
@@ -345,22 +363,25 @@ public class GameManager : MonoBehaviour, IDragHandler
                 {
                     card.SetActive(false);
                 }
-                foreach (GameObject obj in allPlayers)
-                {
-                    obj.GetComponent<Player>().seletedFacilities.Clear();
-                }
-                foreach (GameObject obj in allPlayers)
-                {
-                    obj.GetComponent<Player>().targetIDList.Clear();
-                }
+                allPlayers[0].GetComponent<Player>().cardDropZone.SetActive(true);
+                allPlayers[0].GetComponent<Player>().handDropZone.SetActive(true);
                 maliciousActor.GetComponent<MaliciousActor>().cardDropZone.SetActive(false);
                 maliciousActor.GetComponent<MaliciousActor>().handDropZone.SetActive(false);
-
+                foreach (GameObject players in allPlayers)
+                {
+                    foreach (GameObject card in players.GetComponent<Player>().ActiveCardList)
+                    {
+                        card.SetActive(false);
+                    }
+                }
             }
             else
             {
-                fundText.text = "Funds: " + maliciousActor.funds;
                 activePlayerText.text = "Malicious Player";
+
+                maliciousActor.funds = (int)(5 + turnCount);
+                Debug.Log(maliciousActor.funds);
+                fundText.text = "Action Points: " + maliciousActor.funds;
                 activePlayerColor = new Color(1.0f, 0.0f, 0.0f, 1.0f);
                 activePlayerText.color = activePlayerColor;
                 yarnSpinner.SetActive(false);
@@ -395,7 +416,7 @@ public class GameManager : MonoBehaviour, IDragHandler
                 }
                 foreach (GameObject card in maliciousActor.GetComponent<MaliciousActor>().ActiveCardList)
                 {
-                    card.SetActive(true);
+                    card.SetActive(false);
                 }
                 maliciousActor.targetIDList.Clear();
                 maliciousActor.targetFacilities.Clear();
@@ -438,7 +459,12 @@ public class GameManager : MonoBehaviour, IDragHandler
     {
 
         gameCanvas.SetActive(true);
-        this.GetComponent<PlaceIcons>().spawnAllFacilities(policeToggle.isOn, hospitalToggle.isOn, fireDeptToggle.isOn, elecGenToggle.isOn, waterToggle.isOn, commToggle.isOn, cityHallToggle.isOn, commoditiesToggle.isOn, elecDistToggle.isOn, fuelToggle.isOn, transportationToggle.isOn);
+        
+        // UNCOMMENT THIS WHEN MOVING BACK TO ACI WORK OUTSIDE OF AC SITUATION 09-22-23
+        //this.GetComponent<PlaceIcons>().spawnAllFacilities(policeToggle.isOn, hospitalToggle.isOn, fireDeptToggle.isOn, elecGenToggle.isOn, waterToggle.isOn, commToggle.isOn, cityHallToggle.isOn, commoditiesToggle.isOn, elecDistToggle.isOn, fuelToggle.isOn, transportationToggle.isOn);
+        
+
+
         //this.GetComponent<PlaceIcons>().spawnAllFacilities(true, true, true, true, true, true, true, true, true, true);
         //this.GetComponent<PlaceIcons>().spawnAllFacilities(policeToggle.isOn, hospitalToggle.isOn, fireDeptToggle.isOn, true, true, true, cityHallToggle.isOn, commoditiesToggle.isOn, true, fuelToggle.isOn); // The trues are requried facilities
 
@@ -448,54 +474,55 @@ public class GameManager : MonoBehaviour, IDragHandler
         gameStarted = true;
 
 
-        // Spawn the players
-        int playerCount = 0;
-        if (policeToggle.isOn)
-        {
-            playerCount++;
-        }
-        if (hospitalToggle.isOn)
-        {
-            playerCount++;
-        }
-        if (fireDeptToggle.isOn)
-        {
-            playerCount++;
+        // UNCOMMENT THIS AFTER AC SITUATION
+        //// Spawn the players
+        //int playerCount = 0;
+        //if (policeToggle.isOn)
+        //{
+        //    playerCount++;
+        //}
+        //if (hospitalToggle.isOn)
+        //{
+        //    playerCount++;
+        //}
+        //if (fireDeptToggle.isOn)
+        //{
+        //    playerCount++;
 
-        }
-        if (elecGenToggle.isOn)
-        {
-            playerCount++;
-        }
-        if (waterToggle.isOn)
-        {
-            playerCount++;
-        }
-        if (commToggle.isOn)
-        {
-            playerCount++;
-        }
-        if (elecDistToggle.isOn)
-        {
-            playerCount++;
-        }
-        if (cityHallToggle.isOn)
-        {
-            playerCount++;
+        //}
+        //if (elecGenToggle.isOn)
+        //{
+        //    playerCount++;
+        //}
+        //if (waterToggle.isOn)
+        //{
+        //    playerCount++;
+        //}
+        //if (commToggle.isOn)
+        //{
+        //    playerCount++;
+        //}
+        //if (elecDistToggle.isOn)
+        //{
+        //    playerCount++;
+        //}
+        //if (cityHallToggle.isOn)
+        //{
+        //    playerCount++;
 
-        }
-        if (commoditiesToggle.isOn)
-        {
-            playerCount++;
+        //}
+        //if (commoditiesToggle.isOn)
+        //{
+        //    playerCount++;
 
-        }
-        if (transportationToggle.isOn)
-        {
-            playerCount++;
+        //}
+        //if (transportationToggle.isOn)
+        //{
+        //    playerCount++;
 
-        }
-        SpawnPlayers(playerCount);
-
+        //}
+        //SpawnPlayers(playerCount);
+        SpawnPlayers(1);
         //SpawnPlayers(6); // <-- Need to change this to an input
         SpawnMaliciousActor();
 
@@ -506,7 +533,7 @@ public class GameManager : MonoBehaviour, IDragHandler
         //}
         activePlayerNumber = 0;
 
-        playerActive = true;
+        playerActive = false;
 
         turnCount = 0;
 
@@ -519,15 +546,16 @@ public class GameManager : MonoBehaviour, IDragHandler
 
         if (playerActive)
         {
-            activePlayerText.text = allPlayers[activePlayerNumber].GetComponent<Player>().type + " Player";
-            fundText.text = "Funds: " + allPlayers[activePlayerNumber].GetComponent<Player>().funds;
+            allPlayers[0].SetActive(true);
+            activePlayerText.text = "Resilient Player";
+            fundText.text = "Action Points: " + allPlayers[0].GetComponent<Player>().funds;
             activePlayerColor = new Color(0.0f, 0.4209991f, 1.0f, 1.0f);
             activePlayerText.color = activePlayerColor;
             yarnSpinner.SetActive(true);
-            Debug.Log("Starting player: " + allPlayers[activePlayerNumber].name);
+            Debug.Log("Starting player: " + allPlayers[0].name);
             foreach(GameObject players in allPlayers)
             {
-                if(players == allPlayers[activePlayerNumber])
+                if(players == allPlayers[0])
                 {
                     players.SetActive(true);
                     foreach(GameObject card in players.GetComponent<Player>().HandList)
@@ -597,12 +625,12 @@ public class GameManager : MonoBehaviour, IDragHandler
         }
         else
         {
-            fundText.text = "Funds: " + maliciousActor.funds;
+            fundText.text = "Action Points: " + maliciousActor.funds;
             activePlayerText.text = "Malicious Player";
             activePlayerColor = new Color(1.0f, 0.0f, 0.0f, 1.0f);
             activePlayerText.color = activePlayerColor;
             yarnSpinner.SetActive(false);
-
+            allPlayers[0].SetActive(false);
             foreach (GameObject players in allPlayers)
             {
                 foreach (GameObject card in players.GetComponent<Player>().HandList)
@@ -618,10 +646,10 @@ public class GameManager : MonoBehaviour, IDragHandler
             {
                 card.SetActive(true);
             }
-            foreach (GameObject card in maliciousActor.GetComponent<MaliciousActor>().ActiveCardList)
-            {
-                card.SetActive(true);
-            }
+            //foreach (GameObject card in maliciousActor.GetComponent<MaliciousActor>().ActiveCardList)
+            //{
+            //    card.SetActive(true);
+            //}
         }
     }
 
@@ -634,47 +662,53 @@ public class GameManager : MonoBehaviour, IDragHandler
             {
                 activePlayerNumber = 0;
             }
-            activePlayerText.text = allPlayers[activePlayerNumber].GetComponent<Player>().type + " Player";
-            fundText.text = "Funds: " + allPlayers[activePlayerNumber].GetComponent<Player>().funds;
-            allPlayers[activePlayerNumber].SetActive(true);
-            foreach (GameObject players in allPlayers)
+            activePlayerText.text = "Resilient Player";
+            fundText.text = "Action Points: " + allPlayers[0].GetComponent<Player>().funds;
+            allPlayers[0].SetActive(true);
+            maliciousActor.gameObject.SetActive(false);
+            if (allPlayers[0].GetComponent<Player>().handSize < 5)
             {
-                if (players != allPlayers[activePlayerNumber])
-                {
-                    players.GetComponent<Player>().cardDropZone.SetActive(false);
-                    players.GetComponent<Player>().handDropZone.SetActive(false);
-                    foreach (GameObject card in players.GetComponent<Player>().HandList)
-                    {
-                        card.SetActive(false);
-
-                    }
-                    foreach (GameObject card in players.GetComponent<Player>().ActiveCardList)
-                    {
-                        card.SetActive(false);
-                    }
-                }
-                else
-                {
-                    players.GetComponent<Player>().cardDropZone.SetActive(true);
-                    players.GetComponent<Player>().handDropZone.SetActive(true);
-                    if (allPlayers[activePlayerNumber].GetComponent<Player>().handSize < 5)
-                    {
-                        allPlayers[activePlayerNumber].GetComponent<Player>().DrawCard();
-                    }
-                    foreach (GameObject card in players.GetComponent<Player>().HandList)
-                    {
-                        card.SetActive(true);
-
-                    }
-                    foreach (GameObject card in players.GetComponent<Player>().ActiveCardList)
-                    {
-                        card.SetActive(true);
-                    }
-                }
+                allPlayers[activePlayerNumber].GetComponent<Player>().DrawCard();
             }
+            foreach (GameObject card in allPlayers[0].GetComponent<Player>().HandList)
+            {
+                card.SetActive(true);
+
+            }
+            //foreach (GameObject players in allPlayers)
+            //{
+            //    if (players != allPlayers[activePlayerNumber])
+            //    {
+            //        players.GetComponent<Player>().cardDropZone.SetActive(false);
+            //        players.GetComponent<Player>().handDropZone.SetActive(false);
+            //        foreach (GameObject card in players.GetComponent<Player>().HandList)
+            //        {
+            //            card.SetActive(false);
+
+            //        }
+            //        foreach (GameObject card in players.GetComponent<Player>().ActiveCardList)
+            //        {
+            //            card.SetActive(false);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        players.GetComponent<Player>().cardDropZone.SetActive(true);
+            //        players.GetComponent<Player>().handDropZone.SetActive(true);
+            //        if (allPlayers[0].GetComponent<Player>().handSize < 5)
+            //        {
+            //            allPlayers[activePlayerNumber].GetComponent<Player>().DrawCard();
+            //        }
+            //        foreach (GameObject card in players.GetComponent<Player>().HandList)
+            //        {
+            //            card.SetActive(true);
+
+            //        }
+            //    }
+            //}
             foreach (GameObject fac in allFacilities)
             {
-                if (fac.GetComponent<FacilityV3>().type == allPlayers[activePlayerNumber].GetComponent<Player>().type)
+                if (fac.GetComponent<FacilityV3>().type == allPlayers[0].GetComponent<Player>().type)
                 {
                     Color tempColor = fac.GetComponent<SVGImage>().color;
                     tempColor.a = 1.0f;

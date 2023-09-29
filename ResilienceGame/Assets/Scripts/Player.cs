@@ -10,7 +10,7 @@ using System.Text;
 public class Player : MonoBehaviour
 {
     // Establish necessary fields
-    public float funds = 1000.0f;
+    public float funds = 5.0f;
     public List<GameObject> Facilities;
     public List<GameObject> seletedFacilities;
     public TextMeshProUGUI fundsText;
@@ -27,12 +27,13 @@ public class Player : MonoBehaviour
     public GameObject cardPrefab;
     public GameObject cardDropZone;
     public GameObject handDropZone;
+    public int tryCount;
 
     // Start is called before the first frame update
     void Start()
     {
         maxHandSize = 5;
-        funds = 1000.0f;
+        funds = 5.0f; // CHANGE BACK TO 1000 after 9/29
         cardReader = GameObject.FindObjectOfType<CardReader>();
         for(int i = 0; i < cardReader.CardIDs.Length; i++)
         {
@@ -41,8 +42,9 @@ public class Player : MonoBehaviour
                 Deck.Add(i);
                 CardCountList.Add(cardReader.CardCount[i]);
             }
+            Debug.Log("MAL CARD: " + cardReader.CardTeam[i]);
         }
-        for(int i = 0; i < maxHandSize; i++)
+        for (int i = 0; i < maxHandSize; i++)
         {
             DrawCard();
         }
@@ -104,17 +106,123 @@ public class Player : MonoBehaviour
                 break;
             }
         }
+        //fundsText.text = "Action Points: " + funds;
     }
 
     public void DrawCard()
     {
+        tryCount++;
+        if(tryCount > 10)
+        {
+            GameObject tempCardObj = Instantiate(cardPrefab);
+            Card tempCard = tempCardObj.GetComponent<Card>();
+            tempCard.cardDropZone = cardDropZone;
+            tempCard.cardID = Deck[Deck.Count-1];
+            tempCard.front = cardReader.CardFronts[Deck[Deck.Count - 1]];
+            if (cardReader.CardSubType[Deck[Deck.Count - 1]] == 0)
+            {
+                tempCard.resCardType = Card.ResCardType.Detection;
+                foreach (DictionaryEntry entry in cardReader.blueCardTargets)
+                {
+                    if ((int)entry.Key == Deck[Deck.Count - 1]) // check to make sure that the key (CardID) is the same as this Card's ID
+                    {
+                        tempCard.blueCardTargets = (int[])entry.Value; // If so, give us the right values attached (target card IDs)
+                        break;
+                    }
+                }
+
+            }
+            else if (cardReader.CardSubType[Deck[Deck.Count - 1]] == 2)
+            {
+                tempCard.resCardType = Card.ResCardType.Prevention;
+                foreach (DictionaryEntry entry in cardReader.blueMitMods)
+                {
+                    if ((int)entry.Key == Deck[Deck.Count - 1]) // check to make sure that the key (CardID) is the same as this Card's ID
+                    {
+                        tempCard.blueTargetMits = (List<int>)entry.Value;
+                        tempCard.blueCardTargets = new int[tempCard.blueTargetMits.Count - 1];
+                        tempCard.potentcy = tempCard.blueTargetMits[Deck.Count - 1];
+                        for (int i = 1; i < tempCard.blueTargetMits.Count; i++)
+                        {
+                            tempCard.blueCardTargets[i - 1] = tempCard.blueTargetMits[i];
+                        }
+                        break;
+                    }
+                }
+            }
+            RawImage[] tempRaws = tempCardObj.GetComponentsInChildren<RawImage>();
+            for (int i = 0; i < tempRaws.Length; i++)
+            {
+                if (tempRaws[i].name == "Image")
+                {
+                    tempRaws[i].texture = tempCard.front.img;
+                }
+                else if (tempRaws[i].name == "Background")
+                {
+                    tempRaws[i].color = new Color(0.8067818f, 0.8568867f, 0.9245283f, 1.0f);
+                }
+            }
+            TextMeshProUGUI[] tempTexts = tempCardObj.GetComponentsInChildren<TextMeshProUGUI>();
+            for (int i = 0; i < tempTexts.Length; i++)
+            {
+                if (tempTexts[i].name == "Title Text")
+                {
+                    tempTexts[i].text = Encoding.ASCII.GetString(tempCard.front.title);
+                }
+                else if (tempTexts[i].name == "Impact Text") // SWAP THIS BACK TO IMPACT WHEN IT IS BACK FROM AC SITUATION
+                {
+                    tempTexts[i].text = Encoding.ASCII.GetString(tempCard.front.impact);
+                }
+            }
+            TextMeshProUGUI[] tempInnerText = tempCardObj.GetComponent<CardFront>().innerTexts.GetComponentsInChildren<TextMeshProUGUI>();
+            for (int i = 0; i < tempInnerText.Length; i++)
+            {
+                if (tempInnerText[i].name == "Percent Chance Text")
+                {
+                    tempInnerText[i].text = "Percent Chance: " + cardReader.CardPercentChance[Deck[Deck.Count - 1]] + "%"; // Need to fix this 07/25
+                }
+                else if (tempInnerText[i].name == "Description Text") // SWAP THIS BACK TO IMPACT WHEN IT IS BACK FROM AC SITUATION
+                {
+                    tempInnerText[i].text = Encoding.ASCII.GetString(tempCard.front.description);
+                }
+
+
+            }
+            TextMeshProUGUI costText = tempCardObj.GetComponent<CardFront>().costText.GetComponentInChildren<TextMeshProUGUI>();
+            costText.text = "" + cardReader.CardCost[Deck[Deck.Count - 1]];
+            tempCard.percentSuccess = cardReader.CardPercentChance[Deck[Deck.Count - 1]];
+            tempCard.percentSpread = cardReader.CardSpreadChance[Deck[Deck.Count - 1]];
+            //tempCard.potentcy = cardReader.CardImpact[Deck[rng]];
+            tempCard.duration = cardReader.CardDuration[Deck[Deck.Count - 1]];
+            tempCard.cost = cardReader.CardCost[Deck[Deck.Count - 1]];
+            tempCard.teamID = cardReader.CardTeam[Deck[Deck.Count - 1]];
+            if (cardReader.CardTargetCount[Deck[Deck.Count - 1]] == int.MaxValue)
+            {
+                tempCard.targetCount = Facilities.Count;
+            }
+            else
+            {
+                tempCard.targetCount = cardReader.CardTargetCount[Deck[Deck.Count - 1]];
+            }
+            tempCardObj.GetComponent<slippy>().map = tempCardObj;
+            tempCard.state = Card.CardState.CardDrawn;
+            Vector3 tempPos = tempCardObj.transform.position;
+            tempCardObj.transform.position = tempPos;
+            tempCardObj.transform.SetParent(handDropZone.transform, false);
+            Vector3 tempPos2 = handDropZone.transform.position;
+            handSize++;
+            tempCardObj.transform.position = tempPos2;
+            HandList.Add(tempCardObj);
+            return;
+        }
         int rng = UnityEngine.Random.Range(0, Deck.Count);
         if(CardCountList.Count <= 0) // Check to ensure the deck is actually built before trying to draw a card
         {
             return;
         }
-        if (CardCountList[rng] > 0)
+        if (CardCountList[rng] > 3)
         {
+            tryCount = 0;
             CardCountList[rng]--;
             GameObject tempCardObj = Instantiate(cardPrefab);
             Card tempCard = tempCardObj.GetComponent<Card>();
@@ -171,9 +279,9 @@ public class Player : MonoBehaviour
                 {
                     tempTexts[i].text = Encoding.ASCII.GetString(tempCard.front.title);
                 }
-                else if (tempTexts[i].name == "Description Text")
+                else if (tempTexts[i].name == "Impact Text") // SWAP THIS BACK TO IMPACT WHEN IT IS BACK FROM AC SITUATION
                 {
-                    tempTexts[i].text = Encoding.ASCII.GetString(tempCard.front.description);
+                    tempTexts[i].text = Encoding.ASCII.GetString(tempCard.front.impact);
                 }
             }
             TextMeshProUGUI[] tempInnerText = tempCardObj.GetComponent<CardFront>().innerTexts.GetComponentsInChildren<TextMeshProUGUI>();
@@ -183,12 +291,15 @@ public class Player : MonoBehaviour
                 {
                     tempInnerText[i].text = "Percent Chance: " + cardReader.CardPercentChance[Deck[rng]] + "%"; // Need to fix this 07/25
                 }
-                else if (tempInnerText[i].name == "Impact Text")
+                else if (tempInnerText[i].name == "Description Text") // SWAP THIS BACK TO IMPACT WHEN IT IS BACK FROM AC SITUATION
                 {
-                    tempInnerText[i].text = Encoding.ASCII.GetString(tempCard.front.impact);
+                    tempInnerText[i].text = Encoding.ASCII.GetString(tempCard.front.description);
                 }
 
+
             }
+            TextMeshProUGUI costText = tempCardObj.GetComponent<CardFront>().costText.GetComponentInChildren<TextMeshProUGUI>();
+            costText.text = "" + cardReader.CardCost[Deck[rng]];
             tempCard.percentSuccess = cardReader.CardPercentChance[Deck[rng]];
             tempCard.percentSpread = cardReader.CardSpreadChance[Deck[rng]];
             //tempCard.potentcy = cardReader.CardImpact[Deck[rng]];
@@ -218,6 +329,86 @@ public class Player : MonoBehaviour
             DrawCard();
         }
     }
+
+    public bool PlayCardAC(Card card)
+    {
+        Debug.Log(funds - card.cost);
+        if (funds - card.cost == 0)
+        {
+            switch (card.cost)
+            {
+                case 5:
+                    Debug.Log("FMS FILED");
+                    funds = 0; 
+                    fundsText.text = "Action Points: 0";
+                    TextMeshProUGUI[] textMeshProUGUIs = gameManager.resilientPlayerEndMenu.GetComponentsInChildren<TextMeshProUGUI>();
+                    foreach (TextMeshProUGUI texts in textMeshProUGUIs)
+                    {
+                        if (texts.name == "Resilient Player Text")
+                        {
+                            texts.text = "Good job filing the FMS Request! Keep your eyes on it!";
+                        }
+                        else if(texts.name == "Malicious Actor Text")
+                        {
+                            texts.text = "Malicious Player \n Press Continue to Play";
+                        }
+                    }
+                    gameManager.EnableSwapPlayerMenu();
+
+                    return true;
+
+                case 6:
+                    Debug.Log("SEND FOLLOW UP");
+                    funds = 0;
+                    fundsText.text = "Action Points: 0";
+                    TextMeshProUGUI[] textMeshProUGUIs2 = gameManager.resilientPlayerEndMenu.GetComponentsInChildren<TextMeshProUGUI>();
+                    foreach (TextMeshProUGUI texts in textMeshProUGUIs2)
+                    {
+                        if (texts.name == "Resilient Player Text")
+                        {
+                            texts.text = "Since you haven't heard anything, good job sending a follow-up!";
+                        }
+                        else if (texts.name == "Malicious Actor Text")
+                        {
+                            texts.text = "Malicious Player \n Press Continue to Play";
+                        }
+                    }
+                    gameManager.EnableSwapPlayerMenu();
+
+                    return true;
+
+
+                case 7:
+                    Debug.Log("ORDERED");
+                    funds = 0;
+                    fundsText.text = "Action Points: 0";
+                    TextMeshProUGUI[] textMeshProUGUIs3 = gameManager.resilientPlayerEndMenu.GetComponentsInChildren<TextMeshProUGUI>();
+                    foreach (TextMeshProUGUI texts in textMeshProUGUIs3)
+                    {
+                        if (texts.name == "Resilient Player Text")
+                        {
+                            texts.text = "Good job on taking the initiative to order the crankshaft yourself!";
+                        }
+                        else if (texts.name == "Malicious Actor Text")
+                        {
+                            texts.text = "Thank you for playing! \n Look forward to new updates!";
+                        }
+                    }
+                    gameManager.EnableSwapPlayerMenu();
+
+                    return true;
+
+            }
+        }
+        else
+        {
+            return false;
+
+        }
+        return false;
+
+    }
+
 
     public void PlayCard(int cardID, int[] targetID, int targetCount = 3)
     {

@@ -11,7 +11,7 @@ using System.Text;
 public class MaliciousActor : MonoBehaviour
 {
     // Establish necessary fields
-    public float funds = 750.0f;
+    public float funds = 5.0f;
     public List<GameObject> targetFacilities;
     public GameObject ransomwaredFacility;
     public GameManager manager;
@@ -30,15 +30,19 @@ public class MaliciousActor : MonoBehaviour
     public GameObject cardDropZone;
     public GameObject handDropZone;
     public GameObject map;
+    public TextMeshProUGUI fundsText;
+
 
 
     // Start is called before the first frame update
     void Start()
     {
-        funds = 750.0f;
+        funds = 5.0f;
         cardReader = GameObject.FindObjectOfType<CardReader>();
         manager = GameObject.FindObjectOfType<GameManager>();
         //Debug.Log("TEST MAL START");
+        Debug.Log(maxHandSize);
+        Debug.Log(HandList.Count);
         for (int i = 0; i < cardReader.CardIDs.Length; i++)
         {
             if (cardReader.CardTeam[i] == (int)(Card.Type.Malicious)) // Uncomment to build the deck
@@ -67,6 +71,7 @@ public class MaliciousActor : MonoBehaviour
             for (int i = 0; i < maxHandSize; i++)
             {
                 DrawCard();
+                
             }
         }
     }
@@ -93,6 +98,9 @@ public class MaliciousActor : MonoBehaviour
                 break;
             }
         }
+        //fundsText.text = "Action Points: " + funds;
+
+
     }
 
     public void SpawnDeck()
@@ -116,7 +124,7 @@ public class MaliciousActor : MonoBehaviour
         }
         //Debug.Log("ID: " + Deck[rng] + " TYPE: " + cardReader.CardTeam[Deck[rng]] + " " + CardCountList[rng]);
         //if (cardReader.CardCount[Deck[rng]] > 0)
-        if (CardCountList[rng] > 0)
+        if (CardCountList[rng] > 3)
         {
             CardCountList[rng]--;
             //cardReader.CardCount[Deck[rng]]--;
@@ -157,6 +165,10 @@ public class MaliciousActor : MonoBehaviour
                 {
                     tempTexts[i].text = Encoding.ASCII.GetString(tempCard.front.title);
                 }
+                else if (tempTexts[i].name == "Impact Text") // SWAP THIS BACK TO AC AFTER
+                {
+                    tempTexts[i].text = "" + cardReader.CardImpact[Deck[rng]];
+                }
                 else if (tempTexts[i].name == "Description Text")
                 {
                     tempTexts[i].text = Encoding.ASCII.GetString(tempCard.front.description);
@@ -170,9 +182,9 @@ public class MaliciousActor : MonoBehaviour
                 {
                     tempInnerText[i].text = "Percent Chance: " + cardReader.CardPercentChance[Deck[rng]] + "%"; // Need to fix this 07/25
                 }
-                else if (tempInnerText[i].name == "Impact Text")
+                else if (tempInnerText[i].name == "Description Text") // SWAP THIS BACK TO AC AFTER
                 {
-                    tempInnerText[i].text = "Pop. Impacted: " + cardReader.CardImpact[Deck[rng]] + "%";
+                    tempInnerText[i].text = Encoding.ASCII.GetString(tempCard.front.description);
                 }
                 else if (tempInnerText[i].name == "Spread Text")
                 {
@@ -238,6 +250,8 @@ public class MaliciousActor : MonoBehaviour
             tempCard.percentSpread = cardReader.CardSpreadChance[Deck[rng]];
             tempCard.potentcy = cardReader.CardImpact[Deck[rng]];
             tempCard.duration = cardReader.CardDuration[Deck[rng]];
+            TextMeshProUGUI tempCost = tempCardObj.GetComponent<CardFront>().costText.GetComponentInChildren<TextMeshProUGUI>();
+            tempCost.text = "" + cardReader.CardCost[Deck[rng]];
             tempCard.cost = cardReader.CardCost[Deck[rng]];
             tempCard.teamID = cardReader.CardTeam[Deck[rng]];
             if(cardReader.CardTargetCount[Deck[rng]] == int.MaxValue)
@@ -268,6 +282,85 @@ public class MaliciousActor : MonoBehaviour
             Debug.Log("not enough");
             DrawCard();
         }
+    }
+
+    public bool PlayCardAC(Card card)
+    {
+        Debug.Log(funds - card.cost);
+        if(funds - card.cost == 0)
+        {
+            switch (card.cost)
+            {
+                case 5:
+                    Debug.Log("AC ROCKED");
+                    funds = 0;
+                    fundsText.text = "Action Points: 0";
+                    TextMeshProUGUI[] textMeshProUGUIs = manager.maliciousPlayerEndMenu.GetComponentsInChildren<TextMeshProUGUI>();
+                    foreach (TextMeshProUGUI texts in textMeshProUGUIs)
+                    {
+                        if(texts.name == "Malicious Actor Text")
+                        {
+                            texts.text = "The A/C Unit has been overclocked causing the A/C to overheat!";
+                        }
+                        else if (texts.name == "Resilient Player Text")
+                        {
+                            texts.text = "Resilient Player \n Press Continue to Play";
+                        }
+                    }
+                    manager.EnableSwapPlayerMenu();
+
+                    return true;
+
+                case 6:
+                    Debug.Log("INSIGHT FEAR");
+                    funds = 0;
+                    fundsText.text = "Action Points: 0";
+                    TextMeshProUGUI[] textMeshProUGUIs2 = manager.maliciousPlayerEndMenu.GetComponentsInChildren<TextMeshProUGUI>();
+                    foreach (TextMeshProUGUI texts in textMeshProUGUIs2)
+                    {
+                        if (texts.name == "Malicious Actor Text")
+                        {
+                            texts.text = "You have incited panic by causing students to ponder if RIT actually cares!";
+                        }
+                        else if (texts.name == "Resilient Player Text")
+                        {
+                            texts.text = "Resilient Player \n Press Continue to Play";
+                        }
+                    }
+                    manager.EnableSwapPlayerMenu();
+
+                    return true;
+
+
+                case 7:
+                    Debug.Log("SCAM");
+                    funds = 0;
+                    fundsText.text = "Action Points: 0";
+                    TextMeshProUGUI[] textMeshProUGUIs3 = manager.maliciousPlayerEndMenu.GetComponentsInChildren<TextMeshProUGUI>();
+                    foreach (TextMeshProUGUI texts in textMeshProUGUIs3)
+                    {
+                        if (texts.name == "Malicious Actor Text")
+                        {
+                            texts.text = "You have posted a fake Crankshaft listing, hopefully they choose it!";
+                        }
+                        else if (texts.name == "Resilient Player Text")
+                        {
+                            texts.text = "Resilient Player \n Press Continue to Play";
+                        }
+                    }
+                    manager.EnableSwapPlayerMenu();
+
+                    return true;
+
+            }
+        }
+        else
+        {
+            return false;
+
+        }
+        return false;
+
     }
 
 
