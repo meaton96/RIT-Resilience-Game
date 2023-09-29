@@ -9648,7 +9648,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 809, y: 384}
+  m_AnchoredPosition: {x: 839.8, y: 425.39}
   m_SizeDelta: {x: 300, y: 140}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &954198106
@@ -13256,7 +13256,7 @@ MonoBehaviour:
   maliciousCards: []
   globalModifiers: []
   CardFronts: []
-  cardFileLoc: D:\Profiles\sbb7355\source\repos\RIT-Resilience-Game\ResilienceGame\Assets\Cards\AC
+  cardFileLoc: D:\Profiles\sbb7355\Documents\GitHub\RIT-Resilience-Game\ResilienceGame\Assets\Cards\AC
     Scenario\Cards - A_C Scenario.csv
   players: []
   maliciousActor: {fileID: 0}
@@ -14828,7 +14828,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -898, y: 476}
+  m_AnchoredPosition: {x: -975.672, y: 433.7}
   m_SizeDelta: {x: 125, y: 125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1357449876
@@ -23173,7 +23173,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -898, y: 476}
+  m_AnchoredPosition: {x: -975.692, y: 433.7}
   m_SizeDelta: {x: 125, y: 125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2006741263
