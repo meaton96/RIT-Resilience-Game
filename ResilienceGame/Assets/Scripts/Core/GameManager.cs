@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour, IRGObservable
     public bool mCreateWaterAtlas = false;
     public List<Card> redCards;
     public List<Card> blueCards;
+    private List<int> usedSectors;
 
     // where are we in game phases?
     GamePhase mGamePhase = GamePhase.Start;
@@ -65,7 +66,10 @@ public class GameManager : MonoBehaviour, IRGObservable
     // var's we use so we don't have to switch between
     // the player types for generic stuff
     public CardPlayer actualPlayer;
-    public CardPlayer opponentPlayer;
+
+    public List<CardPlayer> bluePlayers;
+    public List<CardPlayer> redPlayers;
+
     public GameObject opponentPlayedZone;
     public TextMeshProUGUI mTurnText;
     public TextMeshProUGUI mPhaseText;
@@ -106,6 +110,7 @@ public class GameManager : MonoBehaviour, IRGObservable
     public static GameManager instance;
 
     static bool hasStartedAlready = false;
+    
 
 
     public void Awake()
@@ -162,6 +167,7 @@ public class GameManager : MonoBehaviour, IRGObservable
             runner = yarnSpinner.GetComponent<DialogueRunner>();
             background = yarnSpinner.transform.GetChild(0).GetChild(0).gameObject;
             //Debug.Log(background);
+
             hasStartedAlready = true;
         } else
         {
@@ -177,23 +183,30 @@ public class GameManager : MonoBehaviour, IRGObservable
         // we should know when choice they
         // wanted by now and can set up
         // appropriate values
-
-        // TODO: Change PlayerType
         if (playerType==PlayerTeam.Red)
         {
-            //actualPlayer = energyPlayer;
             actualPlayer.playerTeam = PlayerTeam.Red;
             actualPlayer.DeckName = "red";
+            redPlayers.Add(actualPlayer);
         }
         else if (playerType==PlayerTeam.Blue)
         {
-            //actualPlayer = waterPlayer;
             actualPlayer.playerTeam = PlayerTeam.Blue;
             actualPlayer.DeckName = "blue";
-
-            // TODO: Set randomly
-            actualPlayer.playerSector = gameCanvas.GetComponentInChildren<Sector>();
+            bluePlayers.Add(actualPlayer);
+            actualPlayer.playerSector = gameCanvas.GetComponentInChildren<Sector>(); 
             actualPlayer.playerSector.Initialize(PlayerSector.Water);
+            // TODO: Set randomly
+            /*if(bluePlayers.Count < 5)
+            {
+                int sector = Random.Range(0, 3);
+                for (int i = 0; i < bluePlayers.Count; i++)
+                {
+                    
+                }
+                actualPlayer.playerSector.Initialize((PlayerSector)sector);
+
+            }*/
         }
 
         // Initialize the deck info and set various
@@ -280,7 +293,7 @@ public class GameManager : MonoBehaviour, IRGObservable
                     // set the discard area to work if necessary
                     actualPlayer.discardDropZone.SetActive(true);
                     mNumberDiscarded = 0;
-                    DisplayGameStatus("[TEAM COLOR] has drawn " + actualPlayer.HandCards.Count + " cards each."); 
+                    DisplayGameStatus(actualPlayer.playerSector.ToString() + " has drawn " + actualPlayer.HandCards.Count + " cards each."); 
                 } else
                 {
                     // draw cards if necessary
@@ -295,7 +308,7 @@ public class GameManager : MonoBehaviour, IRGObservable
                     {
                         if (mIsDiscardAllowed)
                         {
-                            mNumberDiscarded += actualPlayer.HandlePlayCard(GamePhase.Draw, opponentPlayer);
+                            mNumberDiscarded += actualPlayer.HandlePlayCard(GamePhase.Draw, null); // TODO: Replace null
                         }
                     }
                 }
@@ -355,7 +368,7 @@ public class GameManager : MonoBehaviour, IRGObservable
                         DisplayGameStatus(mPlayerName.text + " has spent their meeples. Please push End Phase to continue.");
                     } else
                     {
-                        actualPlayer.HandlePlayCard(GamePhase.Action, opponentPlayer);
+                        actualPlayer.HandlePlayCard(GamePhase.Action, null); // TODO: Replace null
                     }
                 }
                 else if (phaseJustChanged)
@@ -528,8 +541,24 @@ public class GameManager : MonoBehaviour, IRGObservable
         }
 
         // set up the opponent name text
-        if (RGNetworkPlayerList.instance.playerIDs.Count > 0)
+        for (int i = 0; i < RGNetworkPlayerList.instance.playerIDs.Count; i++)
         {
+            CardPlayer opponentPlayer = new CardPlayer();
+
+            mOpponentName.text = RGNetworkPlayerList.instance.playerNames[i];
+            mOpponentDeckType.text = "" + RGNetworkPlayerList.instance.playerTypes[i];
+            opponentType = RGNetworkPlayerList.instance.playerTypes[i];
+            opponentPlayer.playerTeam = RGNetworkPlayerList.instance.playerTypes[i];
+            opponentPlayer.DeckName = opponentPlayer.playerTeam.ToString().Trim().ToLower();
+            if (RGNetworkPlayerList.instance.playerTypes[i] == PlayerTeam.Blue)
+            {
+                bluePlayers.Add(opponentPlayer);
+            }
+            else
+            {
+                redPlayers.Add(opponentPlayer);
+            }
+
             Debug.Log("player ids greater than zero for realstart");
             if (RGNetworkPlayerList.instance.localPlayerID == 0)
             {
@@ -548,8 +577,6 @@ public class GameManager : MonoBehaviour, IRGObservable
             if (opponentType == PlayerTeam.Red)
             {
                 //opponentPlayer = energyPlayer;
-                opponentPlayer.playerTeam = PlayerTeam.Red;
-                opponentPlayer.DeckName = "red";
             }
             else
             {
@@ -582,8 +609,8 @@ public class GameManager : MonoBehaviour, IRGObservable
     {
         mGamePhase = GamePhase.End;
         endGameCanvas.SetActive(true);
-        endGameText.text = mPlayerName.text + " ends the game with score " + actualPlayer.GetScore() +
-            " and " + mOpponentName.text + " ends the game with score " + opponentPlayer.GetScore();
+        endGameText.text = mPlayerName.text + " ends the game with score " + actualPlayer.GetScore();// +
+            //" and " + mOpponentName.text + " ends the game with score " + opponentPlayer.GetScore();
     }
 
     public bool HasReceivedEndGame()
@@ -765,7 +792,14 @@ public class GameManager : MonoBehaviour, IRGObservable
         switch (phase)
         {
             case GamePhase.Action:
-                opponentPlayer.AddUpdates(ref updates, phase, actualPlayer);
+                if(actualPlayer.playerTeam == PlayerTeam.Blue)
+                {
+                    for(int i = 0; i < redPlayers.Count; i++)
+                    {
+                        redPlayers[i].AddUpdates(ref updates, phase, actualPlayer);
+                    }
+                }
+                //opponentPlayer.AddUpdates(ref updates, phase, actualPlayer);
                 break;
             /*case GamePhase.Vulnerability:
                 // This phase is more painful since it's an opponent card on top of a player facility
@@ -834,8 +868,8 @@ public class GameManager : MonoBehaviour, IRGObservable
 
     public void AddOpponentFacility(int facilityId, int uniqueId)
     {
-        opponentPlayer.DrawCard(false, facilityId, uniqueId, ref opponentPlayer.FacilityIDs, opponentPlayedZone,
-            false, ref opponentPlayer.ActiveFacilities);
+        //opponentPlayer.DrawCard(false, facilityId, uniqueId, ref opponentPlayer.FacilityIDs, opponentPlayedZone,
+        //    false, ref opponentPlayer.ActiveFacilities);
     }
 
     // Gets the next phase.
@@ -1021,8 +1055,8 @@ public class GameManager : MonoBehaviour, IRGObservable
 
     public void ResetForNewGame()
     {
-        actualPlayer.ResetForNewGame();
-        opponentPlayer.ResetForNewGame();
+        actualPlayer.ResetForNewGame(); // TODO: Replace with the Player Lists
+        //opponentPlayer.ResetForNewGame();
 
         // where are we in game phases?
         mGamePhase = GamePhase.Start;
