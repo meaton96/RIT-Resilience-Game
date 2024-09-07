@@ -7156,6 +7156,11 @@ MonoBehaviour:
   playerDropZone: {fileID: 1920413917}
   cardStackingCanvas: {fileID: 2138364093}
   DeckName: 
+  cardSpacing: 0.5
+  cardWidth: 1
+  handCenterX: 0
+  handY: -4
+  hoverHeight: 0.5
   blueMeepleCount: 0
   blackMeepleCount: 0
   purpleMeepleCount: 0
@@ -11885,6 +11890,11 @@ MonoBehaviour:
   playerDropZone: {fileID: 1920413917}
   cardStackingCanvas: {fileID: 2138364093}
   DeckName: 
+  cardSpacing: 0.5
+  cardWidth: 1
+  handCenterX: 0
+  handY: -4
+  hoverHeight: 0.5
   blueMeepleCount: 0
   blackMeepleCount: 0
   purpleMeepleCount: 0
@@ -17891,7 +17901,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1920413917}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
   m_Name: 

@@ -85,6 +85,14 @@ public class CardPlayer : MonoBehaviour
     public readonly float ORIGINAL_SCALE = 0.2f;
     public string DeckName="";
 
+    private float cardSpacing = 55f;
+    private float cardWidth = 40f;
+    private float handCenterX = 1020f;
+    private float handY = 180f;
+    private float hoverHeight = 30f;
+
+    private List<GameObject> orderedHandCards = new List<GameObject>();
+
     //Meeples
     // TODO: Move to Sector.cs if needed
     public int blueMeepleCount, blackMeepleCount, purpleMeepleCount = 0;
@@ -126,6 +134,8 @@ public class CardPlayer : MonoBehaviour
         opponentDropMax.x = opponentRectTransform.position.x + (opponentRectTransform.rect.width / 2);
         opponentDropMax.y = opponentRectTransform.position.y + (opponentRectTransform.rect.height / 2);
 
+        orderedHandCards = new List<GameObject>(HandCards.Values);
+
     }
 
     public static void AddCards(List<Card> cardList)
@@ -158,16 +168,16 @@ public class CardPlayer : MonoBehaviour
 
     public virtual void DrawCards()
     {
-        if (HandCards.Count < maxHandSize) // TODO: Liar???????
-        {
+        if (HandCards.Count < maxHandSize) {
             int count = HandCards.Count;
-            for (int i = 0; i < maxHandSize - count; i++)
-            {
-                if (DeckIDs.Count > 0)
-                {
-                    DrawCard(true, 0, -1, ref DeckIDs, handDropZone, true, ref HandCards);
-                } else
-                {
+            for (int i = 0; i < maxHandSize - count; i++) {
+                if (DeckIDs.Count > 0) {
+                    var newCard = DrawCard(true, 0, -1, ref DeckIDs, handDropZone, true, ref HandCards);
+                    if (newCard != null) {
+                        orderedHandCards.Add(newCard.gameObject);
+                    }
+                }
+                else {
                     break;
                 }
             }
@@ -351,10 +361,36 @@ public class CardPlayer : MonoBehaviour
         return tempCard;
     }
 
+    public void RemoveCardFromHand(GameObject cardObj) {
+        HandCards.Remove(cardObj.GetComponent<Card>().UniqueID);
+        orderedHandCards.Remove(cardObj);
+    }
+
     // Update is called once per frame
     void Update()
     {
         // nothing to update at the moment
+        PositionCardsInHand();
+    }
+    private void PositionCardsInHand() {
+        int cardCount = orderedHandCards.Count;
+        float totalWidth = (cardCount - 1) * cardSpacing + cardWidth;
+        float startX = handCenterX - totalWidth / 2;
+
+        for (int i = 0; i < cardCount; i++) {
+            GameObject cardObj = orderedHandCards[i];
+            Vector3 targetPosition = new Vector3(startX + i * cardSpacing, handY, 0);
+
+            // Check if the card is being hovered
+            HoverScale hoverScale = cardObj.GetComponent<HoverScale>();
+            if (hoverScale && hoverScale.isHovering) {
+                targetPosition.y += hoverHeight;
+                cardObj.transform.SetAsLastSibling();
+            }
+
+            // Smoothly move the card to its target position
+            cardObj.transform.position = Vector3.Lerp(cardObj.transform.position, targetPosition, Time.deltaTime * 10f);
+        }
     }
 
     public void ResetMeepleCost()
